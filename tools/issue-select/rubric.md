@@ -39,6 +39,7 @@ will fail eval issues designed around that family.
 |unclaimed-issue| The "this issue:" line under Repo facts plus every comment in the Comments section| ALL of these hold: (1) assignees is `none`; (2) no linked PR is open, and no comment mentions an open PR for this issue; (3) no comment dated within 30 days before the capture date says the writer is taking or working on the issue (examples: "I'll take this", "can I work on this", "working on this"), unless a later comment withdraws it. A claim older than 30 days with no PR mentioned after it does not count. A closed, unmerged PR is not a claim.|Required|
 |latest-release-within-a-year|"latest release" under Repo facts|Newest release/ship is dated within the past 365 days|Preferred|
 |preferred-language|"language" line under Repo facts|The repo's primary language is Python|Preferred|
+|scope|"Issue body" under Issue|Pass only if the issue describes a single, bounded contribution that can be implemented without first selecting or implementing another issue. Fail if the issue is an index that primarily lists or links to other issues, or if the requested change explicitly requires implementing a new multi-part feature across multiple application components (for example, toolbar + element behavior + export + app wiring).|Required|
 
 ## Verdict rule
 
