@@ -70,7 +70,8 @@ All three required checks pass → accept. It also carries good first issue and 
      "evidence": "Single bounded fix: return False on passlib UnknownHashError in core/security.py and drop the xfail in tests/unit/test_security.py; 'Estimated effort: 1-2 hours'"}
   ],
   "verdict": "accept"
-}```
+}
+```
 
 ---
 
