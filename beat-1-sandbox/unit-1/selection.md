@@ -14,62 +14,93 @@ wrong label is not graded.
 ## Selected issue
 
 **Issue link**
+https://github.com/codepath/pathreview-ai301-fa26-s1/issues/72
 
-[The individual Path Review issue page. A link to the repository or the issue list
-does not satisfy this field.]
 
 **Verdict output**
 
-[Your skill's live-mode output for this issue, pasted verbatim and ending with the
-fenced JSON verdict block. A summary does not satisfy this field.]
-
-**The verdict must record `accept` for this issue.** Choose an issue your own skill
-accepts. If your skill rejects every candidate you try, that is a signal about your
-rubric rather than about the issues: revise it and re-run — retries are unlimited and a
-partial re-run costs about $0.20 — or run the skill on different candidates. Output
-recording `reject` for the issue you chose earns no credit for this field.
-
 ```
-paste the output here, including the closing JSON block
-```
+All required evidence gathered. Grading:
+
+Check: maintainer-commits
+Grade: pass
+Evidence: Newest default-branch commit 2026-09-16T21:42:18Z (Andrew Burke) — 3 days
+before today (2026-09-19)
+────────────────────────────────────────
+Check: AI policy
+Grade: pass
+Evidence: No AI ban anywhere: no root/.github CONTRIBUTING, and docs/CONTRIBUTING.md,
+PULL_REQUEST_TEMPLATE.md, README contain no AI-use restriction. Silence passes.
+────────────────────────────────────────
+Check: unclaimed-issue
+Grade: pass
+Evidence: "assignees":[], "comments":[], issue timeline has only 4 LabeledEvents (no
+connected/cross-referenced PR), and gh search prs "72" returned []
+────────────────────────────────────────
+Check: latest-release-within-a-year (preferred)
+Grade: fail
+Evidence: "latestRelease":null; /releases returns 0
+────────────────────────────────────────
+Check: preferred-language (preferred)
+Grade: pass
+Evidence: "primaryLanguage":{"name":"Python"}
+────────────────────────────────────────
+Check: scope
+Grade: pass
+Evidence: One bounded fix — catch passlib's UnknownHashError in core/security.py so
+verification returns False, plus remove the @pytest.mark.xfail in
+tests/unit/test_security.py; "Estimated effort: 1–2 hours"
+
+All three required checks pass → accept. It also carries good first issue and tier-1 labels, is written by the repo maintainer, and names its two relevant files. Of the two preferred checks, it wins on language (Python) and loses on releases — but this repo has no releases at all, so that will be true of every candidate here and won't separate it from other accepted issues.
+
+{
+  "item": "https://github.com/codepath/pathreview-ai301-fa26-s1/issues/72",
+  "checks": [
+    {"name": "maintainer-commits", "grade": "pass",
+     "evidence": "Newest default-branch commit is 2026-09-16T21:42:18Z (Andrew Burke), 3 days before today 2026-09-19"},
+    {"name": "AI policy", "grade": "pass",
+     "evidence": "No AI-contribution ban in docs/CONTRIBUTING.md, .github/PULL_REQUEST_TEMPLATE.md, or README; no AI_POLICY.md present"},
+    {"name": "unclaimed-issue", "grade": "pass",
+     "evidence": "assignees [], comments [], timeline has only LabeledEvents (no connected/cross-referenced PR), PR search for '72' returned none"},
+    {"name": "latest-release-within-a-year", "grade": "fail",
+     "evidence": "latestRelease is null and the releases endpoint returns 0 entries"},
+    {"name": "preferred-language", "grade": "pass",
+     "evidence": "Repo primaryLanguage is Python"},
+    {"name": "scope", "grade": "pass",
+     "evidence": "Single bounded fix: return False on passlib UnknownHashError in core/security.py and drop the xfail in tests/unit/test_security.py; 'Estimated effort: 1-2 hours'"}
+  ],
+  "verdict": "accept"
+}```
 
 ---
 
 ## Eval iterations
 
-Quote source text directly in each field below. Paraphrase does not satisfy them.
-
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+agreement: 1/1 scored items
+agreement: 18/20 scored items (bar: 18/20: PASS)
+agreement: 18/20 scored items (bar: 18/20: PASS)
 
 **Issue analysis**
 
-[One scored issue, identified by id (`issue-01` through `issue-20`; the `calib-`
-issues are not scored). State your rubric's decision, the gold label, and the
-reasoning that produced your rubric's result.]
+issue-20 — rubric decision: accept; gold label: reject.
+
+The required maintainer-commits, AI policy, unclaimed-issue, and scope checks passed. The latest-release-within-a-year check failed, but it is a preferred check and therefore does not change the verdict. The preferred-language check passed. Because all required checks passed, the rubric returned accept. The gold label was reject, so this was one of the cases where my rubric did not match the expected decision.
 
 **Check rationale**
 
-[One check from the `rubric.md` uploaded to `tools/issue-select/`, quoted as it is
-currently written, with the reasoning behind its current form.]
+|scope|"Issue body" under Issue|Pass only if the issue describes a single, bounded contribution that can be implemented without first selecting or implementing another issue. Fail if the issue is an index that primarily lists or links to other issues, or if the requested change explicitly requires implementing a new multi-part feature across multiple application components (for example, toolbar + element behavior + export + app wiring).|Required|
+
+I added this check to make the rubric account for whether an issue is appropriate for a newcomer, rather than relying only on repository activity, contribution policy, and whether the issue is unclaimed. The check specifically targets issues that span over multiple areas or are actually a bundle of multiple issues, which is to avoid.
 
 **Trade-offs**
 
-[What the quoted check gives up. Any one of these is a complete answer: an issue whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+The scope check changed issue-10 from an incorrect accept to the correct reject. I re-ran issue-10 and issue-20 with --only after adding the check. Issue-10 then matched the gold reject, while issue-20 remained an accept. This shows that the check catches the megaissue case but still misses at least one scope case that the gold labels reject.
 
 ---
 
 ## Selection rationale
-
-Graded on whether all three are answered, in your own words. Not on how good the
-reasoning is, and not on length — a short honest answer to each earns the full marks.
-This is also the basis for the claim comment you write in Unit 2.
 
 **Selection rationale**
 
@@ -81,6 +112,11 @@ This is also the basis for the claim comment you write in Unit 2.
 3. The anticipated difficulty in claiming it.]
 
 ---
+1. Issue #72 fits my interests because it is a Python issue involving error handling and existing application behavior, which is relevant to the Software and AI Engineering skills I am developing. The estimated effort is 1–2 hours, so it also fits the time available for Unit 2.
+
+2. The verdict correctly identified that the repository is active, the issue is unclaimed, the project uses Python, and there is no contribution-policy restriction on AI assistance. I also considered the issue's estimated effort and whether the specific bug sounded manageable for my personal skill set, which my rubric did not directly measure.
+
+3. The main difficulty I anticipate is getting familiar with the existing password/hash verification code and understanding how malformed stored hashes are currently handled. I expect the coding change itself to be relatively contained, but reproducing the problem and understanding the project's tests may take some time.
 
 Related paths: `eval-run.txt` in this directory; your skill's files in
 `tools/issue-select/`.
