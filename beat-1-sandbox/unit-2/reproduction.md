@@ -15,8 +15,7 @@ label is not graded.
 
 **GitHub username**
 
-[Your GitHub username, exactly as it appears on your profile — no `@`, no profile URL. Your
-comments upstream are identified by this name.]
+melina-m-04
 
 ---
 
@@ -24,16 +23,44 @@ comments upstream are identified by this name.]
 
 **Claim comment**
 
-[Link to the comment where you claimed the issue. Use the comment's own permalink, not the
-issue page on its own. **Then paste the text of that comment underneath the link** — the
-pasted text is what this field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s1/issues/72#issuecomment-5861015535
+
+"I’d like to investigate issue #72: verify_password in core/security.py raises passlib.exc.UnknownHashError when given the malformed stored hash used by test_verify_with_wrong_hash_format, instead of returning False.
+
+I’ll reproduce the reported behavior against the documented test case in a clean environment, record the environment, commands, and result, and share the reproduction evidence here before proposing a fix. If reproduced, I’ll also check the covering xfail test (manifest H-05) as part of the follow-up."
 
 **Reproduction comment**
 
-[Link to the comment where you posted your reproduction. It must record the environment
-(OS, relevant versions, code state), steps a stranger could follow, and what you observed.
-**Then paste the text of that comment underneath the link** — the pasted text is what this
-field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s1/issues/72#issuecomment-5861277597
+
+"Reproduced.
+
+Environment: macOS 15.7.3 (build 24G419, arm64), Python 3.11.3 in a fresh virtual environment. Repo at commit f89c06f on main, clean working tree. Installed: passlib 1.7.4, bcrypt 4.3.0, python-jose 3.5.0, cryptography 50.0.1, pydantic 2.13.5, pydantic-settings 2.15.0, pytest 9.1.1. The package itself is not installed (pip install -e . not run), so both commands below are run from the repository root. Docker/database services were not required because verify_password in core/security.py has no database dependency.
+
+Steps:
+
+Ran:
+
+python -m pytest tests/unit/test_security.py -k test_verify_with_wrong_hash_format -v
+Result: 1 xfailed, confirming the test is currently marked as an expected failure for issue verify_password raises UnknownHashError on malformed stored hashes instead of returning False #72 / manifest H-05.
+
+Ran:
+
+python -m pytest tests/unit/test_security.py -k test_verify_with_wrong_hash_format -v --runxfail
+Result: 1 failed.
+
+The failure occurs when the test calls:
+
+verify_password("password", "not_a_valid_bcrypt_hash")
+The traceback ends with:
+
+passlib.exc.UnknownHashError: hash could not be identified
+Inspected core/security.py. verify_password currently delegates directly to:
+
+return bool(pwd_context.verify(plain_password, hashed_password))
+with no handling for an unrecognized stored hash.
+
+Result: The issue is reproduced. A malformed/unrecognized stored hash causes verify_password to raise passlib.exc.UnknownHashError instead of returning False, matching the behavior described in issue #72."
 
 ## Eval iterations
 
@@ -42,28 +69,21 @@ fields.
 
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+18/20 → 18/20 → 20/20
 
 **Package analysis**
 
-[Pick one scored package (`pkg-01` through `pkg-20` — the four `calib-` packages are never
-scored). Name it by id, say what your rubric decided and what the gold label said, and
-explain why your rubric read it that way.]
+pkg-19: The rubric decided reject, and the gold label was reject. The revised rubric required the candidate comment to state issue-specific intent rather than making a generic commitment that could apply to any issue. For this package, the rubric's required checks were not satisfied, so it correctly matched the gold reject label.
 
 **Check rationale**
 
-[Quote one check from the `rubric.md` you uploaded to `tools/repro-check/`, exactly as it reads now.
-Then say why it reads that way — what you revised to get there, or what you rejected in
-favour of it.]
+""The comment states what the author actually did and what they intend to do next in terms specific to this issue, and makes no commitment the author cannot honestlyback: no fixed delivery deadline, no guaranteed fix, no request to reserve or hold the issue. A comment whose stated intent would read identically on any other issue fails""
+
+I revised the rubric to add the claim-intent check because the earlier rubric could accept comments that did not clearly state issue-specific intent. This makes the rubric distinguish a genuine, issue-specific claim from a generic or unfollowable commitment.
 
 **Trade-offs**
 
-[Every check gives something up. Any one of these is a complete answer: a package whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+The revised claim-intent check changed the treatment of cases where a comment sounded like a claim but did not contain issue-specific intent. I accepted that this could reject some superficially plausible comments in exchange for avoiding false accepts. The final full evaluation confirmed that this change did not reduce agreement elsewhere: the run achieved 20/20, with all category floors passing.
 
 ---
 
