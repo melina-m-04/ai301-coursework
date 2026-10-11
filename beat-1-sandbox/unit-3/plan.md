@@ -129,4 +129,4 @@ No implementation deviation occurred. The change was implemented as planned in `
 
 During validation, the existing `.venv` was initially missing the repository's declared runtime and development dependencies. As a result, the initial `make test-unit` and `make check` attempts could not complete. I installed the repository's declared `.[dev]` dependencies using the setup path defined by the Makefile and reran the checks successfully.
 
-After the dependency setup, `make test-unit` passed with 377 tests passed and 52 expected failures. Ruff passed, Black reported 110 files unchanged, and mypy reported no issues in 76 source files.
+After dependency setup, `make test-unit` completed with 377 passed tests and 52 expected failures. `make check` passed: Ruff reported all checks passed, Black reported 110 files unchanged, and mypy reported no issues in 76 source files. See `test_evidence.md` for the recorded command results.
