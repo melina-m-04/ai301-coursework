@@ -1,4 +1,4 @@
-# Contribution: [Issue Title]
+# Contribution: Change type of rp (range parent) in content script to not any
 
 Path: `beat-2-contribution/contribution-story.md`
 
@@ -8,10 +8,9 @@ format criteria grade exactly that. Your course repo link is the whole submissio
 files and no evidence uploads are part of Assignment 5.
 
 **Contribution Number:** [1]
-**Student:** [Student name]
-**GitHub Username:** [your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comments upstream are identified by this name.]
-**Issue:** [GitHub issue link]
+**Student:** Melina Marjani
+**GitHub Username:** melina-m-04
+**Issue:** https://github.com/melink14/rikaikun/issues/790
 **Pull Request:** [GitHub PR link, once opened]
 
 One repository, built across units 5 to 8, telling the whole story of your real
@@ -55,16 +54,13 @@ happened; these entries are the toolkit's own timeline.
 All four entries are graded. Keep every heading below, and fill each
 one in the week it belongs to.
 
-**Unit 5: [one line on the tool work]**
+**Unit 5: Built and refined the issue-scout workflow**
 
-[2-4 sentences: what you built (the scout, your strategy), what broke
-or fell short, what changed because of it.]
+I built an issue-scout skill with a search strategy, project-fit scope, and rubric to find and evaluate open-source contribution opportunities. The scan surfaced 180 unique issues, but evaluating recent commits by recency alone could overstate human maintainer activity because some were automated dependency updates.
 
-**Unit 6: [one line on the tool work]**
+**Unit 6: Added voice-guard checks and repository-specific contribution context**
 
-[2-4 sentences: the voice-guard, the repo-memory file. What broke or
-fell short, and what changed because of it. "Nothing broke" counts when
-it is true - say how you know.]
+I built a voice guard (a shared voice guide and a Python check script, wired into repro-check, plan-check, and pr-precheck) and a CLAUDE.local.md memory file for Rikaikun holding its PR rules, the subsystem issue #790 touches, and its test commands. During testing, the guard blocked a GitHub issue-comment command because it could not read a comment body from the help command, so I kept its protection instead of bypassing it and used the repro-check workflow to prepare and post my claim. The memory file fell short at first because my copy commands assumed the wrong clone location, so it landed nowhere until I found the real path, and its first orientation run showed that three branches of the function I am editing have no test. I added a warning about those branches to the file and gave repro-check and plan-check real-repo scope files, so both now follow Rikaikun's contribution rules.
 
 **Unit 7: [one line on the tool work]**
 
@@ -80,24 +76,21 @@ drafted, what you did with the draft.]
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs in your own words: how you searched, what your scan
-surfaced, what your scout's verdict said, why this issue fits your
-profile, and what you hope to learn. If your scout's verdict on it
-was reject and you chose it anyway, say so here and say why; choosing
-against your own tool silently is what loses points. Close with an
-honest read of the tool itself: where the scout fell short on a real
-wild search and what you changed or would change, or what convinced
-you it held up. **Record the link to your claim comment in this section too.**
-Not claimed yet? Write `claim pending` and today's date where the link goes,
-and add the link the moment your claim lands.]
+I used my issue-scout skill to search for open-source issues that matched my background as a recent Computer Science graduate with experience in software engineering, full-stack web development, and AI engineering. I built a search strategy and rubric to evaluate maintainer activity, AI contribution policies, whether an issue was unclaimed, release recency, programming-language preference, project fit, and scope feasibility. The scan surfaced candidates across projects such as CPython, typeshed, ExecuTorch, and Rikaikun. After evaluating the candidates, I chose Rikaikun issue #790, which asks for better types in place of an overly broad any declaration for rp in extension/rikaicontent.ts. My scout accepted the issue: it passed the required checks for AI policy, being unclaimed, scope feasibility, and profile fit, although TypeScript was not my preferred language. Its difficulty note said **<DIFFICULTY: straightforward / moderate / ambitious>**. I chose it because it is a focused software-engineering task that lets me practice TypeScript's type system, understand existing code before modifying it, and improve type safety without changing intended behavior. I claimed the issue, said I would trace rp's uses before introducing more appropriate types, and later posted an update with what the trace found.
+
+The scout helped me narrow a large search into a manageable shortlist, but the search also exposed a limitation: recent repository commits can be automated dependency updates rather than evidence of active human maintenance. For example, Rikaikun's recent commits were Dependabot updates merged by Mergify, while the latest human commit and maintainer comment were older. I recorded this distinction in my scan notes and refined my evaluation process to consider the nature of recent activity instead of relying on commit recency alone. I also added a scope-feasibility check to help distinguish issues with a specific, bounded task from issues that may be too broad or difficult to complete. The experience showed me that the scout is useful for screening and organizing candidates, but its verdict still needs human review of repository history, issue details, and relevant code.
+
+**My claim comment:** **https://github.com/melink14/rikaikun/issues/790#issuecomment-6356026433**
 
 **Toolkit**
 
-- Tool: issue-scout (your scout: your search strategy, your rubric),
-  and how you used it
-- What it produced: [the scan and its verdict on this issue, described]
-- Difficulties: [where it fell short, or "none met" if none did]
-- What changed: [what you patched or would update, or "nothing"]
+- Tool: issue-scout, using my search strategy, scope profile, and rubric to scan and evaluate open-source issues.
+
+- What it produced: A scan of 180 unique good-first-issue and help-wanted results, with 173 unassigned issues remaining after filtering, plus a ranked shortlist and an evaluation of Rikaikun #790.
+
+- Difficulties: Recent automated dependency-update commits could make repository maintenance look more active than the human contribution history suggested. The scout's initial scope evaluation also needed to distinguish whether an issue was genuinely bounded and feasible.
+
+- What changed: I added a scope-feasible check and documented the need to distinguish automated commits from human maintenance activity in my scan notes.
 
 ---
 
@@ -132,31 +125,31 @@ and add the link the moment your claim lands.]
 
 **Environment Setup**
 
-[What a stranger would need to stand this up: your operating system,
-the relevant versions (language, runtime, package manager, the project
-itself), and how you set the project up. Then the challenges you faced
-and how you solved them, or that none came up.]
+macOS 15.7.3, Node v22.17.0, npm 10.9.2. I cloned melink14/rikaikun at commit 607d5cf (2026-10-25), the current upstream main, through my fork, which was up to date with upstream. I ran `npm install`, then `npm run checktypes` (clean) and `npm run test:small` (98 passed, 0 failed).
+
+Challenges: the test runner's Chrome path is hardcoded to /usr/bin/google-chrome, so every test file failed with "Browser was not found" until I set RIKAIKUN_PUPPETEER_EXEC_PATH to my Mac's Chrome for each run. patch-package failed to apply its patch for @remcovaes/web-test-runner-vite-plugin (made for 1.2.2, 1.4.1 installed), but the tests ran anyway. npm install also modified package-lock.json, which I reverted with `git restore` so it can't reach my PR. My first type-error count came out as 0 because tsc's color codes broke my grep; I fixed it by stripping them and later using `--pretty false`.
 
 **Steps to Reproduce**
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+1. Clone melink14/rikaikun at commit 607d5cf and run `npm install`.
+2. Run `npm run checktypes` (no errors) and `npm run test:small` (98 passed, 0 failed).
+3. Run `grep -n "no-explicit-any" extension/rikaicontent.ts` and `grep -n "let rp" extension/rikaicontent.ts`.
+4. Observed: line 1139 is `// eslint-disable-next-line @typescript-eslint/no-explicit-any` and line 1140 is `let rp: any;` inside `tryUpdatePopup`.
+5. On a throwaway branch, change line 1140 to `let rp: Node | null | undefined;` and run `npx tsc --noEmit --incremental false --pretty false`.
+6. Observed: 15 type errors, all from uses of `rp` in `tryUpdatePopup`. Revert the change.
 
 **Reproduction Evidence**
 
-- **Commit showing reproduction:** [link to commit in your fork]
-- **Screenshots/logs:** [if applicable]
-- **My findings:** [what you discovered during reproduction; an
-  honest, evidenced cannot-reproduce that led you to re-pick or ask
-  the maintainer belongs here and costs you nothing]
+- **Commit showing reproduction:** none (nothing was committed; the experiment ran on a throwaway branch and was reverted). Reproduced against upstream commit 607d5cf.
+- **Screenshots/logs:** with `rp` typed `Node | null | undefined`, tsc reports 15 errors: 11 x TS2339 (property does not exist on type `Node`: `data`, `value`, `ariaLabel`, `innerText`, at lines 1184, 1198, 1210, 1253, 1260, 1301), 3 x null handling (TS2345 and TS18047, lines 1189, 1210, 1220), and 1 x TS2322 at line 1293 (`Node | null` is not assignable to `CharacterData | undefined`).
+- **My findings:** `rp` is still `any` on current main behind an eslint-disable comment, as the issue says; what it holds is in my update on the issue thread. The 15 errors depend on the replacement type I probed with, so I treat the number as a probe, not as the fix.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: repro-check, grading my claim comment and my repro report together against issue #790.
+- What it produced: an accept verdict with all five checks passing, including a look at upstream 607d5cf that confirmed lines 1139 and 1140. It flagged an unfilled sync-status placeholder and a leftover internal comment, and suggested cutting findings that repeated my posted update and linking the upstream commit instead of my fork.
+- Difficulties: it did not rerun tsc, so it graded my 15 errors as I reported them. That makes the number only as good as my own re-runnable command.
+- What changed: I filled in the sync status, removed the internal comment, shortened my findings to point to my update, and changed step 1 to clone upstream at the commit.
 
 ---
 
