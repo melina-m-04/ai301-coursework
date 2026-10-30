@@ -98,26 +98,26 @@ The scout helped me narrow a large search into a manageable shortlist, but the s
 
 **Problem Description**
 
-[In your own words, what is broken or missing?]
+In `extension/rikaicontent.ts`, the variable `rp` inside `tryUpdatePopup` is declared as `let rp: any;` behind an eslint-disable comment. It gets reused for five kinds of values: a text node, a sibling or child node that may be null, the result of `getFirstTextChild`, a textarea or input with a `data` property added, and a Google Docs SVG rect with `data` added. Because it is `any`, TypeScript can't check any of its uses.
 
 **Expected Behavior**
 
-[What should happen?]
+`rp`'s uses should be covered by accurately typed variables, so the compiler can catch mistakes and the eslint-disable comment goes away. The extension's behavior should not change, including the `data` property that other code reads.
 
 **Current Behavior**
 
-[What actually happens?]
+The code compiles and the tests pass (98 passed, 0 failed) because `any` turns type checking off. It also hides a mismatch: `rp` is assigned to `Rikaichan.prevRangeNode`, which is typed `CharacterData | undefined`, but `rp` can be null, an Element, a textarea or input, or an SVG rect. Typing `rp` as `Node | null | undefined` in a probe produced 15 type errors.
 
 **Affected Components**
 
-[Which parts of the codebase are involved?]
+`extension/rikaicontent.ts`: `tryUpdatePopup`, the `prevRangeNode` field on `Rikaichan`, and the code that reads `rp.data` (`getTextFromRange` and `show()`). Related tests are in `extension/test/rikaicontent_test.ts`, under `describe('mousemove')`.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: Claude, working from my CLAUDE.local.md notes on issue #790 and the results of my tsc probe.
+- What it produced: a draft of the four answers above, which I checked against my notes and the code.
+- Difficulties: the line numbers and the 15-error count come from my checkout and a probe type, so they may shift and are not the fix itself.
+- What changed: I described the 15 errors as a probe, not a target, and checked each claim against my notes before keeping it.
 
 ---
 
@@ -157,29 +157,37 @@ Challenges: the test runner's Chrome path is hardcoded to /usr/bin/google-chrome
 
 **Analysis**
 
-[Your analysis of the root cause: what is causing the issue, traced
-to the files and functions involved.]
+In `extension/rikaicontent.ts`, `tryUpdatePopup` declares `let rp: any;` behind an eslint-disable comment and reuses it for five kinds of value: the `startNode as CharacterData` cast (nothing checks it), the sibling and child fix-ups (`ChildNode | null`), the result of `getFirstTextChild`, the textarea or input with a `data` property added (`rp = eventTarget; rp.data = rp.value`), and the Google Docs rect with `data` added (`rp = gdocRect; rp.data = rp.ariaLabel`). Because of `any`, none of it is checked. The same `rp` then flows into three places typed `CharacterData | undefined`: the `prevRangeNode` field (line 61), the `tdata.prevRangeNode = rp` assignment, and the `setTimeout` callback parameter `rangeNode`. The final value is chosen by later assignments overwriting earlier ones: `gdocRect` wins, then the textarea or input when `fake` is set, then whatever node the fix-ups left, which may be `null`.
 
 **Proposed Solution**
 
-[High-level description of your fix approach, and what you are
-deliberately NOT changing.]
+1. Add an exported named type for what `rp` can end up holding, and use it for the `prevRangeNode` field and the `setTimeout` callback parameter. A probe widening only the field type gave 0 type errors and touched 6 lines, but `rp` was still `any` then, so I still have to confirm that the final typed value fits.
+2. Replace `rp` with separate, well-typed variables: a `rangeNode: Node | null` for the fix-ups (narrowed with `instanceof CharacterData` wherever `.data` is read, so behavior matches the old code), and the existing `gdocRect`. Combine them into one final value in the same priority order as today: `gdocRect`, then the textarea or input when `fake` is set, then `rangeNode`.
+3. Keep `null` as a possible value instead of mapping it to `undefined`, so the `===` comparisons against `prevRangeNode` behave exactly as before.
+4. Where TypeScript can't know that `fake` means a textarea or input, narrow by `nodeName` or use one documented cast.
+
+I am NOT changing runtime behavior, removing the added `data` property (that would be a separate issue), or touching any other `any` in the file.
 
 **Implementation Plan**
 
-1. [Modify file X to do Y]
-2. [Add or change Z]
-3. [Update tests]
+1. On main, before touching `rikaicontent.ts`, add tests in `describe('mousemove')` for the three branches nothing covers: the WBR branch, the inline and next-sibling fix-ups, and the `getFirstTextChild` branch. Run them on main to confirm they pass, so they pin current behavior.
+2. Add the named type and use it for `prevRangeNode` and the `setTimeout` callback parameter.
+3. Replace `let rp: any;` and its eslint-disable comment with separate typed variables, narrowing with `instanceof CharacterData` instead of the cast.
+4. Write the merge into one final value in the order above, and handle the textarea/input and rect `data` assignments.
+5. Run `npm run lint` (which should pass with the eslint-disable comment gone), `npm run checktypes`, and `npm run test:small`, including the new tests, and re-run my reproduction steps.
 
-[Record deviations here as they happen: what changed mid-build and
-why. A recorded deviation is honest work; silent drift is not.]
+**Unknowns**
+
+- The maintainer hasn't answered my Oct 27 question about how to type `prevRangeNode`. If they prefer another approach, I'll change the plan and say so in the PR.
+- `rp.ariaLabel` can be `null`, but `data` is a `string`. Line 1061 already uses `?? ''`, but doing the same at line 1260 would change a runtime value. I'll check how `getTextFromRange` and `show()` read `data` before choosing.
+- Whether the three uncovered branches can be reached in the test setup. If one can't, I'll say so in the PR and review it by hand instead.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: plan-check, grading my plan and draft comment against issue #790, plus Claude to help me trace the code and revise the plan.
+- What it produced: a first verdict of reject (diagnosis, scope and conventions passed; approach, test plan, unknowns and execution-readiness failed), then accept after I revised the plan.
+- Difficulties: my first plan stored a local union in `prevRangeNode?: CharacterData`, which tsc rejects, and it had no unknowns list or tests for three uncovered branches. Plan-check also did not rerun my probe, so I measured the widening myself.
+- What changed: I probed widening `prevRangeNode` on a throwaway branch (0 type errors, 6 lines), read the code that picks the final value, and rewrote the plan around a named wider type, the same priority order, keeping `null`, tests first, and a list of unknowns.
 
 ---
 
