@@ -11,7 +11,7 @@ files and no evidence uploads are part of Assignment 5.
 **Student:** Melina Marjani
 **GitHub Username:** melina-m-04
 **Issue:** https://github.com/melink14/rikaikun/issues/790
-**Pull Request:** [GitHub PR link, once opened]
+**Pull Request:** https://github.com/melink14/rikaikun/pull/3116
 
 One repository, built across units 5 to 8, telling the whole story of your real
 contribution. Fill it as you work, not at the end — the sections below ask for evidence that
@@ -62,10 +62,9 @@ I built an issue-scout skill with a search strategy, project-fit scope, and rubr
 
 I built a voice guard (a shared voice guide and a Python check script, wired into repro-check, plan-check, and pr-precheck) and a CLAUDE.local.md memory file for Rikaikun holding its PR rules, the subsystem issue #790 touches, and its test commands. During testing, the guard blocked a GitHub issue-comment command because it could not read a comment body from the help command, so I kept its protection instead of bypassing it and used the repro-check workflow to prepare and post my claim. The memory file fell short at first because my copy commands assumed the wrong clone location, so it landed nowhere until I found the real path, and its first orientation run showed that three branches of the function I am editing have no test. I added a warning about those branches to the file and gave repro-check and plan-check real-repo scope files, so both now follow Rikaikun's contribution rules.
 
-**Unit 7: [one line on the tool work]**
+**Unit 7: Installed the ship-gate and wrote my manifest**
 
-[2-4 sentences: the ship-gate and your gate manifest. What it produced
-on your real branch, what fought you, what changed because of it.]
+My manifest runs lint, type check and unit tests, with my Chrome path inline on the test row. On my real branch the gate rejected me four times: seven commits instead of one, a description that undercounted casts, a claim I had not tested, and an unreadable issue thread. The claim led me to a test that showed a real TypeError on main, so the PR now discloses a behavior change instead of calling it type-only. The thread problem was `gh issue view` failing on classic projects, so I patched `fetch_issue` to use `gh api`.
 
 **Unit 8: [one line on the tool work]**
 
@@ -166,7 +165,7 @@ In `extension/rikaicontent.ts`, `tryUpdatePopup` declares `let rp: any;` behind 
 3. Keep `null` as a possible value instead of mapping it to `undefined`, so the `===` comparisons against `prevRangeNode` behave exactly as before.
 4. Where TypeScript can't know that `fake` means a textarea or input, narrow by `nodeName` or use one documented cast.
 
-I am NOT changing runtime behavior, removing the added `data` property (that would be a separate issue), or touching any other `any` in the file.
+I am NOT changing runtime behavior (with one exception, recorded under Deviations below), removing the added `data` property (that would be a separate issue), or touching any other `any` in the file.
 
 **Implementation Plan**
 
@@ -175,6 +174,10 @@ I am NOT changing runtime behavior, removing the added `data` property (that wou
 3. Replace `let rp: any;` and its eslint-disable comment with separate typed variables, narrowing with `instanceof CharacterData` instead of the cast.
 4. Write the merge into one final value in the order above, and handle the textarea/input and rect `data` assignments.
 5. Run `npm run lint` (which should pass with the eslint-disable comment gone), `npm run checktypes`, and `npm run test:small`, including the new tests, and re-run my reproduction steps.
+
+**Deviations**
+
+One runtime change: a Google Docs rect with no `ariaLabel` now gets `data` set to `''` instead of `null`. On main, hovering a labelled rect, moving under 4px onto a rect with no `ariaLabel`, then pressing a lookup key threw a TypeError in `show()`. I added a test that fails on main and passes on my branch. The alternative, `data: string | null`, would touch every reader of `data`.
 
 **Unknowns**
 
@@ -193,65 +196,77 @@ I am NOT changing runtime behavior, removing the added `data` property (that wou
 
 ## Testing Strategy
 
-[What observable checks prove the fix: your reproduction steps re-run
-against the built change (before and after), and the repo's own test
-suite or checks with the outcome shown. "Tests pass" with nothing
-observable named is not a strategy.]
+This started as a type-only refactor, so the four coverage tests cannot fail before the fix; they pin current behavior. One change is a real behavior change (`ariaLabel` becomes `''`), and its test fails on main with a TypeError. The proof is observable before and after, saved in my test_evidence.md.
+
+- **Reproduction, before (main):** `grep -n "let rp"` and `grep -n "no-explicit-any"` on `extension/rikaicontent.ts` show `let rp: any;` at line 1140 and the eslint-disable comment at line 1139. `npm run test:small` gives 98 passed, 0 failed.
+- **Reproduction, after (branch refactor/790-type-rp):** the same greps show `let rp: RangeNode | null;` and no `no-explicit-any` match. `npm run test:small` gives 102 passed, 0 failed.
+- **Repo checks on the branch:** `npm run checktypes`, `npm run lint` (which passes with the eslint-disable comment removed) and `npm run test:small` all exit 0.
+- **Behavior pinned first:** I added four tests in `describe('mousemove')` for branches nothing covered (WBR, inline fix-up, next-sibling fix-up, `getFirstTextChild`) and committed them before the refactor. They passed on the unchanged code and still pass after it.
+- **One reviewed change:** `ariaLabel` now becomes `''` instead of `null` for the Google Docs rect. I checked every reader of `.data`, and all of them treat the two the same.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: `npm run checktypes`, `npm run lint` and `npm run test:small` from my ship-gate manifest, plus Claude to help me write the pinning tests and the evidence file.
+- What it produced: 102 passing tests on the branch (98 on main), a clean type check, and a lint pass with the eslint-disable comment removed.
+- Difficulties: the test runner looks for Chrome at a Linux path, so I set RIKAIKUN_PUPPETEER_EXEC_PATH for every run. My shell is zsh, so a bash-only exit-code trick printed blanks until I read `$?` directly.
+- What changed: I put the Chrome path into the manifest's test command and captured the before and after output in separate files before building test_evidence.md.
 
 ---
 
 ## Implementation Notes
 
-[A running log, added to as you work. Date each entry. What you
-built, decisions you made when you made them, wrong turns included.]
+**2026-10-26**
 
-**[Date]**
+Traced every use of `rp` in `tryUpdatePopup` and found five kinds of value. Posted my claim and a trace update on the issue. First plan: separate typed variables plus a small local union for `prevRangeNode`.
 
-[Entry]
+**2026-10-29 (plan)**
 
-**[Date]**
+plan-check rejected my first plan. Storing a local union in `prevRangeNode?: CharacterData` does not type-check without a cast or widening, I had no unknowns list, and three branches had no tests. I probed widening `prevRangeNode` on a throwaway branch: 0 type errors, 6 lines changed, though `rp` was still `any` then, so it proved only that the readers accept a wider type. I also read the code that picks the final value (later assignments overwrite earlier ones: rect, then textarea or input, then node) and found the timer callback parameter needs the same type. Rewrote the plan around a named `RangeNode` type, keeping `null` so the `===` comparisons behave the same, and plan-check accepted it.
 
-[Entry]
+**2026-10-29 (tests first)**
+
+Added four tests for the branches nothing covered (WBR, inline fix-up, next-sibling fix-up, `getFirstTextChild`) and committed them before touching the code. All passed on unchanged code. I stubbed `caretRangeFromPoint` because headless Chrome will not reliably place the caret at those spots. Found that `isInline` only checks tag names, since `document.nodeType` is never an element.
+
+**2026-10-29 (the fix)**
+
+Three commits: the `RangeNode` type (tsc stayed at 0 errors), then a typed `rangeNode` for the fix-ups (one real tsc error, `parentNode` can be null, fixed with a compile-time `!` so behavior is unchanged), then `rp` typed as `RangeNode | null` with the eslint-disable comment removed. One cast remains: the fix-ups can leave a non-text node in `rp`, and narrowing it away could change the early-return comparison. `ariaLabel` now becomes `''` instead of `null`; I checked every reader of `.data` and none can tell them apart.
+
+**2026-10-29 (evidence)**
+
+Captured before and after output: 98 tests passed on main, 102 on the branch, with checktypes and lint passing. Wrong turns: the "before" capture was skipped at first, and zsh printed blank exit codes for a bash-only trick, so I read `$?` directly.
+
+**2026-10-30 (ship-gate and PR)**
+
+The ship-gate rejected my branch four times. It caught seven commits where CONTRIBUTING wants one, a description that undercounted the casts, and a claim I had written from reading code, not from running it. Chasing the claim showed the `ariaLabel` change is a real behavior change, not a type-only one, so I wrote a test that fails on main with a TypeError and recorded a deviation in plan.md. I squashed to one commit, rebuilt test_evidence.md from saved output, and opened PR #3116.
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: Claude, working from my CLAUDE.local.md notes and the code I pasted, plus git commits and `tsc` runs to check each step.
+- What it produced: a step-by-step refactor in small commits, with four pinning tests committed first.
+- Difficulties: it could not see my files, so it asked me to paste code before each change and several commands needed fixing for zsh and the Chrome path.
+- What changed: I committed after each verified step and recorded the wrong turns in these notes.
 
 ---
 
 ## Pull Request
 
-**PR Link:** [GitHub PR URL when opened]
+**PR Link:** https://github.com/melink14/rikaikun/pull/3116
 
-**PR Description:** [what the PR says; much of the content above
-adapts into it]
+**PR Description:** Replaces the `any`-typed `rp` in `tryUpdatePopup` with a `RangeNode` type and a typed `rangeNode` for the caret fix-ups, and removes the eslint-disable comment. It adds five tests: four for branches that had no coverage (WBR, inline fix-up, next-sibling fix-up, `getFirstTextChild`) and one for a Google Docs rect with no `ariaLabel`. One small behavior change: that rect's `data` is now `''` instead of `null`. On main, a keydown after a small move onto it threw a TypeError, and the test fails on main and passes on my branch. The description also lists every cast and assertion in the diff. Test counts: 98 passed on main, 103 on the branch. Fixes #790.
 
 **Maintainer Feedback:**
 
-- [Date]: [feedback received, or "none yet"; silence is a normal
-  state and costs you nothing]
-- [Date]: [how you addressed it]
+- 2026-10-30: none yet. My Oct 27 question about how to type `prevRangeNode` is also still unanswered.
+- 2026-10-30: nothing to address yet.
 
-**Status:** [Awaiting review / Iterating / Merged / Closed. The
-status is a fact you record, never a grade: the PR is graded as
-opened.]
+**Status:** Awaiting review
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: the ship-gate (my manifest's lint, type check and unit tests, then my pr-precheck on the branch, plan, evidence and description).
+- What it produced: four rejections, then a PASS on all seven pr-precheck checks, with all three manifest checks green.
+- Difficulties: the gate fetched the issue with `gh issue view`, which fails with a GraphQL projectCards error on this repo, so it could not read the thread. The test runner also needed my Chrome path, and rikaikun's husky pre-push hook failed the first push for the same reason.
+- What changed: I patched `fetch_issue` in my local check_gate.py to use `gh api` (backup kept), squashed to one commit, fixed two false claims, and pushed with the Chrome path set.
 
 ---
 
