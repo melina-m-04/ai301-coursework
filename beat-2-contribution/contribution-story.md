@@ -13,46 +13,9 @@ files and no evidence uploads are part of Assignment 5.
 **Issue:** https://github.com/melink14/rikaikun/issues/790
 **Pull Request:** https://github.com/melink14/rikaikun/pull/3116
 
-One repository, built across units 5 to 8, telling the whole story of your real
-contribution. Fill it as you work, not at the end — the sections below ask for evidence that
-is far easier to write down as it happens than to reconstruct in the last weekend.
-
-Contribution Number stays `[1]` unless you make more than one contribution this term; it
-just numbers them.
-
 ---
 
 ## Toolkit
-
-Every story section below, from Why I Chose This Issue through Pull
-Request, ends with a Toolkit block: which tool did that phase's work
-and how you used it, what it produced, what difficulties or
-shortcomings it presented, and what you changed or would change
-because of them. Together the blocks are the thread the rubric's
-Toolkit points read, and they are the raw material for your unit-9
-portfolio, so keep them current as you work rather than
-reconstructing them later.
-
-A Toolkit block looks like this (copy it into each story section and
-fill it there):
-
-```text
-**Toolkit**
-
-- Tool: [which tool did this phase's work, and how you used it]
-- What it produced: [described in a sentence or a short excerpt]
-- Difficulties: [what fought you or fell short, or "none met"]
-- What changed: [the patch, revision, or workaround, what you would
-  update, or "nothing"]
-```
-
-This section also keeps one short dated entry per week of tool work,
-starting below: what you built or changed that week, what broke, and
-what you changed because of it. The blocks tell the story where it
-happened; these entries are the toolkit's own timeline.
-
-All four entries are graded. Keep every heading below, and fill each
-one in the week it belongs to.
 
 **Unit 5: Built and refined the issue-scout workflow**
 
@@ -60,16 +23,15 @@ I built an issue-scout skill with a search strategy, project-fit scope, and rubr
 
 **Unit 6: Added voice-guard checks and repository-specific contribution context**
 
-I built a voice guard (a shared voice guide and a Python check script, wired into repro-check, plan-check, and pr-precheck) and a CLAUDE.local.md memory file for Rikaikun holding its PR rules, the subsystem issue #790 touches, and its test commands. During testing, the guard blocked a GitHub issue-comment command because it could not read a comment body from the help command, so I kept its protection instead of bypassing it and used the repro-check workflow to prepare and post my claim. The memory file fell short at first because my copy commands assumed the wrong clone location, so it landed nowhere until I found the real path, and its first orientation run showed that three branches of the function I am editing have no test. I added a warning about those branches to the file and gave repro-check and plan-check real-repo scope files, so both now follow Rikaikun's contribution rules.
+I built a voice guard (a shared voice guide and a Python check script, wired into repro-check, plan-check, and pr-precheck) and a CLAUDE.local.md memory file for the repo, Rikaikun, holding its PR rules, the subsystem issue #790 touches, and its test commands. During testing, the guard blocked a GitHub issue-comment command because it could not read a comment body from the help command, so I kept its protection instead of bypassing it and used the repro-check workflow to prepare and post my claim. The memory file fell short at first because my copy commands assumed the wrong clone location, so it landed nowhere until I found the real path, and its first orientation run showed that three branches of the function I am editing have no test. I added a warning about those branches to the file and gave repro-check and plan-check real-repo scope files, so both now follow Rikaikun's contribution rules.
 
 **Unit 7: Installed the ship-gate and wrote my manifest**
 
-My manifest runs lint, type check and unit tests, with my Chrome path inline on the test row. On my real branch the gate rejected me four times: seven commits instead of one, a description that undercounted casts, a claim I had not tested, and an unreadable issue thread. The claim led me to a test that showed a real TypeError on main, so the PR now discloses a behavior change instead of calling it type-only. The thread problem was `gh issue view` failing on classic projects, so I patched `fetch_issue` to use `gh api`.
+My manifest runs lint, type check and unit tests, with my Chrome path inline on the test row. On my real branch the gate rejected me four times: seven commits instead of one, a description that undercounted casts, a claim I had not fully tested, and an unreadable issue thread. The claim led me to a test that showed a real TypeError on main, so the PR now discloses a behavior change instead of calling it type-only. The thread problem was `gh issue view` failing on classic projects, so I patched `fetch_issue` to use `gh api`.
 
-**Unit 8: [one line on the tool work]**
+**Unit 8: Built a PR monitor and a playbook with a 7-day nudge threshold**
 
-[2-4 sentences: the PR-monitor and your playbook. What it read, what it
-drafted, what you did with the draft.]
+The PR monitor read my PR #3116 (6 days quiet as of 11/05/2026, no reviews, one check pending) and, using my playbook, drafted a wait note instead of a nudge because my 7-day threshold was not met; I agreed and posted nothing. Writing the playbook was harder than running the monitor: the last 15 merged PRs were all bots, so I searched 1,000 merged PRs and found only three from outside contributors, whose first maintainer responses took between 3 hours and 1.8 days. The monitor's report counted 1 pending check and didn't say why, but the Checks tab showed 3 workflows awaiting maintainer approval and six required checks that hadn't run, so the summary understated what was blocking my PR. I set the threshold at 7 days, noted in the playbook that the sample is small, and added a rule to name any check waiting on maintainer approval in my one nudge.
 
 ---
 
@@ -239,6 +201,10 @@ Captured before and after output: 98 tests passed on main, 102 on the branch, wi
 
 The ship-gate rejected my branch four times. It caught seven commits where CONTRIBUTING wants one, a description that undercounted the casts, and a claim I had written from reading code, not from running it. Chasing the claim showed the `ariaLabel` change is a real behavior change, not a type-only one, so I wrote a test that fails on main with a TypeError and recorded a deviation in plan.md. I squashed to one commit, rebuilt test_evidence.md from saved output, and opened PR #3116.
 
+**2026-11-05 (PR monitor and playbook)**
+
+Installed the PR monitor and wrote my playbook from rikaikun's real review times. The last 15 merged PRs were all bots, so I searched 1,000 and found three outside-contributor PRs, with first maintainer responses between 3 hours and 1.8 days. I set the nudge threshold at 7 days. The monitor read my PR (6 days quiet, no reviews) and drafted a wait note, since the threshold is not met until about 22:22 UTC on Nov 6. I posted nothing.
+
 **Toolkit**
 
 - Tool: Claude, working from my CLAUDE.local.md notes and the code I pasted, plus git commits and `tsc` runs to check each step.
@@ -256,8 +222,7 @@ The ship-gate rejected my branch four times. It caught seven commits where CONTR
 
 **Maintainer Feedback:**
 
-- 2026-10-30: none yet. My Oct 27 question about how to type `prevRangeNode` is also still unanswered.
-- 2026-10-30: nothing to address yet.
+- 2026-11-05: none yet. No comments or reviews in the 6 days since I opened the PR. CI is waiting on maintainer approval of 3 workflows. My Oct 27 question on the issue about how to type `prevRangeNode` is also still unanswered.
 
 **Status:** Awaiting review
 
@@ -274,25 +239,23 @@ The ship-gate rejected my branch four times. It caught seven commits where CONTR
 
 **Technical Skills Gained**
 
-[What you learned technically, named concretely.]
+I learned to replace an `any` with a named type, `RangeNode | null`, and to let `tsc` tell me what was wrong at each step. A union stored in a field typed `prevRangeNode?: CharacterData` does not type-check without a cast or widening, and a compile-time `!` on a possibly null `parentNode` leaves runtime behavior unchanged. I also learned to write pinning tests before refactoring: I stubbed `caretRangeFromPoint` because headless Chrome will not reliably place the caret at those spots, and four tests for uncovered branches passed on unchanged code before I touched anything. Reading every reader of `.data` showed me that `null` and `''` are indistinguishable there, which is how I judged the `ariaLabel` change safe.
 
 **Challenges Overcome**
 
-[What was hard and how you solved it; point at the real events, the
-Toolkit blocks above are full of them.]
+The hardest part was that a "type-only" refactor turned out to change behavior. The ship-gate rejected my branch four times (seven commits where CONTRIBUTING wants one, a description that undercounted casts, a claim I had not run, and an unreadable issue thread). Chasing the untested claim led me to a test that fails on main with a TypeError, so the PR now discloses the `ariaLabel` change honestly. When `gh issue view` failed on this repo's classic projects, I patched `fetch_issue` to use `gh api` instead of bypassing the check. Environment problems (my Chrome path, the husky pre-push hook, zsh printing blank exit codes) took longer than the code, and I solved each by reading the real error.
 
 **What I'd Do Differently Next Time**
 
-[Reflection on your process.]
+I would follow CONTRIBUTING’s one-commit rule from the start instead of squashing seven at the end. I would capture the "before" output on main before changing anything, and I would never write a claim in the description until I have run the code that proves it.
 
 ---
 
 ## Resources Used
 
-[What actually helped, not a reading list. List things this story
-already shows you using: the doc you followed to set the environment
-up, the thread that explained the bug, the person who answered you.
-One real entry beats ten plausible ones.]
+What helped, in the order I used it:
 
-- [Link to documentation that helped]
-- [Discussion, issue, or post that helped]
+- Rikaikun's CONTRIBUTING.md (https://github.com/melink14/rikaikun/blob/main/CONTRIBUTING.md): it told me the PR should be one commit, which the ship-gate enforced and I had to squash to meet. It also says to add commits during review instead of rebasing.
+- Rikaikun issue #790 (https://github.com/melink14/rikaikun/issues/790): the thread that described the `any`-typed `rp`. I used it to trace every use of `rp` and to post my claim and trace update.
+- My own CLAUDE.local.md notes for Rikaikun: they held the PR rules, the test commands, and the warning about three untested branches, which led to my four pinning tests.
+- Merged PRs #2662, #2158, and #1974 from outside contributors: I used their timestamps to set my 7-day nudge threshold.
